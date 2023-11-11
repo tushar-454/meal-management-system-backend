@@ -1,10 +1,12 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const express = require('express');
 const app = express();
+const cors = require('cors');
 require('dotenv').config();
 const port = process.env.PORT || 4000;
 // middleware
 app.use(express.json());
+app.use(cors());
 
 // database connection
 
@@ -22,7 +24,37 @@ async function run() {
   try {
     await client.connect();
 
+    // database colleciton
+    const allMealCollection = client
+      .db('meal-minder-pro')
+      .collection('allMeal');
+
     // all api end point for save data in database
+
+    // get all meal from database api end point
+    app.get('/api/v1/user/all-meal', async (req, res) => {
+      const result = await allMealCollection.find().toArray();
+      res.send(result);
+    });
+
+    // add a meal in database api end point
+    app.post('/api/v1/user/add-meal', async (req, res) => {
+      const { uid, date, breackfast, launch, dinner } = req.body;
+      const mealInfo = {
+        [uid]: {
+          date,
+          breackfast,
+          launch,
+          dinner,
+        },
+      };
+      try {
+        const result = await allMealCollection.insertOne(mealInfo);
+        res.send(result);
+      } catch (error) {
+        console.log(error.message);
+      }
+    });
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
