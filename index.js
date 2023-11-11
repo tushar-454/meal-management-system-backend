@@ -33,6 +33,26 @@ async function run() {
 
     // get all meal from database api end point
     app.get('/api/v1/user/all-meal', async (req, res) => {
+      const { uid, date } = req.query;
+      try {
+        // get all meal by user uid
+        if (uid) {
+          const allMealArr = await allMealCollection.find().toArray();
+          const uidAllMeal = allMealArr.filter(
+            (singleMeal) => Object.keys(singleMeal)[0] === uid
+          );
+          // get one meal by user uid and date
+          if (date) {
+            const uidOneMealByDate = uidAllMeal.filter(
+              (singleMeal) => singleMeal[uid].date === date
+            );
+            return res.send(uidOneMealByDate);
+          }
+          return res.send(uidAllMeal);
+        }
+      } catch (error) {
+        console.log(error.message);
+      }
       const result = await allMealCollection.find().toArray();
       res.send(result);
     });
