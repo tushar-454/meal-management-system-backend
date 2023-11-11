@@ -56,6 +56,17 @@ async function run() {
       }
     });
 
+    // get all money api end point
+    app.get('/api/v1/user/all-money', async (req, res) => {
+      const { uid, date } = req.query;
+      try {
+        const allMoneyArr = await allMoneyCollection.find().toArray();
+        res.send(allMoneyArr);
+      } catch (error) {
+        console.log(error.message);
+      }
+    });
+
     // add a meal in database api end point
     app.post('/api/v1/user/add-meal', async (req, res) => {
       const { uid, date, breackfast, launch, dinner } = req.body;
@@ -76,7 +87,7 @@ async function run() {
     });
 
     // add money in database api end point
-    app.post('/api/v1/user/all-money', async (req, res) => {
+    app.post('/api/v1/user/add-money', async (req, res) => {
       const { uid, paymentTime, toWhome, money, status } = req.body;
       const moneyInfo = {
         [uid]: {
