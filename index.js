@@ -24,10 +24,10 @@ async function run() {
   try {
     await client.connect();
 
-    // database colleciton
-    const allMealCollection = client
-      .db('meal-minder-pro')
-      .collection('allMeal');
+    // database and database collection
+    const database = client.db('meal-minder-pro');
+    const allMealCollection = database.collection('allMeal');
+    const allMoneyCollection = database.collection('allMoney');
 
     // all api end point for save data in database
 
@@ -35,9 +35,9 @@ async function run() {
     app.get('/api/v1/user/all-meal', async (req, res) => {
       const { uid, date } = req.query;
       try {
+        const allMealArr = await allMealCollection.find().toArray();
         // get all meal by user uid
         if (uid) {
-          const allMealArr = await allMealCollection.find().toArray();
           const uidAllMeal = allMealArr.filter(
             (singleMeal) => Object.keys(singleMeal)[0] === uid
           );
@@ -50,11 +50,10 @@ async function run() {
           }
           return res.send(uidAllMeal);
         }
+        res.send(allMealArr);
       } catch (error) {
         console.log(error.message);
       }
-      const result = await allMealCollection.find().toArray();
-      res.send(result);
     });
 
     // add a meal in database api end point
@@ -70,6 +69,25 @@ async function run() {
       };
       try {
         const result = await allMealCollection.insertOne(mealInfo);
+        res.send(result);
+      } catch (error) {
+        console.log(error.message);
+      }
+    });
+
+    // add money in database api end point
+    app.post('/api/v1/user/all-money', async (req, res) => {
+      const { uid, paymentTime, toWhome, money, status } = req.body;
+      const moneyInfo = {
+        [uid]: {
+          paymentTime,
+          toWhome,
+          money,
+          status,
+        },
+      };
+      try {
+        const result = await allMoneyCollection.insertOne(moneyInfo);
         res.send(result);
       } catch (error) {
         console.log(error.message);
