@@ -58,9 +58,23 @@ async function run() {
 
     // get all money api end point
     app.get('/api/v1/user/all-money', async (req, res) => {
-      const { uid, date } = req.query;
+      const { uid, paymentDate } = req.query;
       try {
         const allMoneyArr = await allMoneyCollection.find().toArray();
+        // get all money info by user uid
+        if (uid) {
+          const uidAllMoney = allMoneyArr.filter(
+            (singleMoney) => Object.keys(singleMoney)[0] === uid
+          );
+          // get one moneyinfo by user uid and date
+          if (paymentDate) {
+            const uidOneMoneyByDate = uidAllMoney.filter(
+              (singleMoney) => singleMoney[uid].paymentTime === paymentDate
+            );
+            return res.send(uidOneMoneyByDate);
+          }
+          return res.send(uidAllMoney);
+        }
         res.send(allMoneyArr);
       } catch (error) {
         console.log(error.message);
