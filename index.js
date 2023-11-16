@@ -84,6 +84,23 @@ async function run() {
 
     // get all costing info from database api
     app.get('/api/v1/user/all-cost', async (req, res) => {
+      const { email, date, type } = req.query;
+      if (email && !date && !type) {
+        const result = await allCostCollection
+          .find({ whoDoingBazarEmail: email })
+          .toArray();
+        return res.send(result);
+      }
+      if (!email && date && !type) {
+        const result = await allCostCollection.find({ date }).toArray();
+        return res.send(result);
+      }
+      if (!email && !date && type) {
+        const result = await allCostCollection
+          .find({ whatType: type })
+          .toArray();
+        return res.send(result);
+      }
       const result = await allCostCollection.find().toArray();
       res.send(result);
     });
