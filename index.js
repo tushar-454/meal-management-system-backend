@@ -29,6 +29,7 @@ async function run() {
     const allMealCollection = database.collection('allMeal');
     const allMoneyCollection = database.collection('allMoney');
     const allCostCollection = database.collection('allCost');
+    const userInfoCollection = database.collection('userInfo');
 
     // all api end point for save data in database
 
@@ -159,6 +160,13 @@ async function run() {
     app.post('/api/v1/user/add-cost', async (req, res) => {
       const costDoc = req.body;
       const result = await allCostCollection.insertOne(costDoc);
+      res.send(result);
+    });
+
+    // add user basic info in database
+    app.post('/api/v1/userInfo', async (req, res) => {
+      const userInfoDoc = req.body;
+      const result = await userInfoCollection.insertOne(userInfoDoc);
       res.send(result);
     });
 
