@@ -82,6 +82,12 @@ async function run() {
       }
     });
 
+    // get all costing info from database api
+    app.get('/api/v1/user/all-cost', async (req, res) => {
+      const result = await allCostCollection.find().toArray();
+      res.send(result);
+    });
+
     // add a meal in database api end point
     app.post('/api/v1/user/add-meal', async (req, res) => {
       const { uid, date, breackfast, launch, dinner } = req.body;
