@@ -28,6 +28,7 @@ async function run() {
     const database = client.db('meal-minder-pro');
     const allMealCollection = database.collection('allMeal');
     const allMoneyCollection = database.collection('allMoney');
+    const allCostCollection = database.collection('allCost');
 
     // all api end point for save data in database
 
@@ -117,6 +118,13 @@ async function run() {
       } catch (error) {
         console.log(error.message);
       }
+    });
+
+    // add a bazar cost list in database
+    app.post('/api/v1/user/add-cost', async (req, res) => {
+      const costDoc = req.body;
+      const result = await allCostCollection.insertOne(costDoc);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
