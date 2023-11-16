@@ -118,6 +118,13 @@ async function run() {
       res.send(result);
     });
 
+    // get all user basic info in database
+    app.get('/api/v1/userInfo', async (req, res) => {
+      const { email } = req.query;
+      const result = await userInfoCollection.findOne({ email });
+      res.send(result);
+    });
+
     // add a meal in database api end point
     app.post('/api/v1/user/add-meal', async (req, res) => {
       const { uid, date, breackfast, launch, dinner } = req.body;
