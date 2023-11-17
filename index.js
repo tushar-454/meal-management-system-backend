@@ -129,18 +129,39 @@ async function run() {
     // add a meal in database api end point
     app.post('/api/v1/user/add-meal', async (req, res) => {
       const { email, date, breackfast, launch, dinner } = req.body;
-      const mealInfo = {
+      const isExists = await allMealCollection.findOne({
         email,
-        date,
-        breackfast,
-        launch,
-        dinner,
-      };
-      try {
-        const result = await allMealCollection.insertOne(mealInfo);
-        res.send(result);
-      } catch (error) {
-        console.log(error.message);
+        date: new Date().toLocaleDateString(),
+      });
+      if (!isExists) {
+        return res.send([
+          {
+            message:
+              "Can't find todays meal, first contact with manager or admin",
+          },
+        ]);
+      }
+      if (isExists && new Date().getHours() < 20) {
+        return res.send([
+          {
+            message: 'Your todays meal already exists.',
+          },
+        ]);
+      }
+      if (isExists && new Date().getHours() > 19) {
+        const mealInfo = {
+          email,
+          date,
+          breackfast,
+          launch,
+          dinner,
+        };
+        try {
+          const result = await allMealCollection.insertOne(mealInfo);
+          res.send(result);
+        } catch (error) {
+          console.log(error.message);
+        }
       }
     });
 
@@ -182,11 +203,16 @@ async function run() {
       const { id, email } = req.query;
       const filter = { _id: new ObjectId(id) };
       const { breackfast, launch, dinner } = req.body;
+      if (
+        (new Date().getHours() > 5 && new Date().getHours() < 2) ||
+        (new Date().getHours() > 16 && new Date().getHours() < 20)
+      ) {
+        return res.send([{ message: 'Timeout for update' }]);
+      }
       const updatedMealDoc = {
         $set: {
           breackfast,
           launch,
-          dinner,
         },
       };
       const result = await allMealCollection.updateOne(filter, updatedMealDoc);
