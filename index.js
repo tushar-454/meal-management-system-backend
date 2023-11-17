@@ -203,20 +203,42 @@ async function run() {
       const { id, email } = req.query;
       const filter = { _id: new ObjectId(id) };
       const { breackfast, launch, dinner } = req.body;
-      if (
-        (new Date().getHours() > 5 && new Date().getHours() < 2) ||
-        (new Date().getHours() > 16 && new Date().getHours() < 20)
-      ) {
-        return res.send([{ message: 'Timeout for update' }]);
+      if (new Date().getHours() > 6 && new Date().getHours() < 20) {
+        return res.send([
+          { message: "Timeout, Can't update breackfast or launch meal now." },
+        ]);
       }
-      const updatedMealDoc = {
-        $set: {
-          breackfast,
-          launch,
-        },
-      };
-      const result = await allMealCollection.updateOne(filter, updatedMealDoc);
-      res.send(result);
+      if (new Date().getHours() > 16 && new Date().getHours() < 20) {
+        return res.send([{ message: "Timeout, Can't update any meal now." }]);
+      }
+      // just update dinner info
+      if (new Date().getHours() > 13 && new Date().getHours() < 17) {
+        const updatedMealDoc = {
+          $set: {
+            dinner,
+          },
+        };
+        const result = await allMealCollection.updateOne(
+          filter,
+          updatedMealDoc
+        );
+        return res.send(result);
+      }
+      // update brackfast or launch info
+      if (new Date().getHours() > 19 && new Date().getHours() < 7) {
+        const updatedMealDoc = {
+          $set: {
+            breackfast,
+            launch,
+            dinner,
+          },
+        };
+        const result = await allMealCollection.updateOne(
+          filter,
+          updatedMealDoc
+        );
+        return res.send(result);
+      }
     });
 
     // Send a ping to confirm a successful connection
