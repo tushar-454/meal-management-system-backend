@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const app = express();
 const cors = require('cors');
@@ -35,18 +35,19 @@ async function run() {
 
     // get all meal from database api end point
     app.get('/api/v1/user/all-meal', async (req, res) => {
-      const { uid, date } = req.query;
+      const { email, date } = req.query;
       try {
         const allMealArr = await allMealCollection.find().toArray();
         // get all meal by user uid
-        if (uid) {
+        if (email) {
           const uidAllMeal = allMealArr.filter(
-            (singleMeal) => Object.keys(singleMeal)[0] === uid
+            (singleMeal) => singleMeal.email === email
           );
           // get one meal by user uid and date
           if (date) {
             const uidOneMealByDate = uidAllMeal.filter(
-              (singleMeal) => singleMeal[uid].date === date
+              (singleMeal) =>
+                new Date(singleMeal.date).toLocaleDateString() === date
             );
             return res.send(uidOneMealByDate);
           }
@@ -127,14 +128,13 @@ async function run() {
 
     // add a meal in database api end point
     app.post('/api/v1/user/add-meal', async (req, res) => {
-      const { uid, date, breackfast, launch, dinner } = req.body;
+      const { email, date, breackfast, launch, dinner } = req.body;
       const mealInfo = {
-        [uid]: {
-          date,
-          breackfast,
-          launch,
-          dinner,
-        },
+        email,
+        date,
+        breackfast,
+        launch,
+        dinner,
       };
       try {
         const result = await allMealCollection.insertOne(mealInfo);
@@ -174,6 +174,22 @@ async function run() {
     app.post('/api/v1/userInfo', async (req, res) => {
       const userInfoDoc = req.body;
       const result = await userInfoCollection.insertOne(userInfoDoc);
+      res.send(result);
+    });
+
+    // user add meal update api
+    app.put('/api/v1/user/update-meal', async (req, res) => {
+      const { id, email } = req.query;
+      const filter = { _id: new ObjectId(id) };
+      const { breackfast, launch, dinner } = req.body;
+      const updatedMealDoc = {
+        $set: {
+          breackfast,
+          launch,
+          dinner,
+        },
+      };
+      const result = await allMealCollection.updateOne(filter, updatedMealDoc);
       res.send(result);
     });
 
