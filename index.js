@@ -210,7 +210,7 @@ async function run() {
       const { id, email } = req.query;
       const filter = { _id: new ObjectId(id) };
       const { breackfast, launch, dinner } = req.body;
-      if (new Date().getHours() > 6 && new Date().getHours() < 20) {
+      if (new Date().getHours() > 7 && new Date().getHours() < 20) {
         return res.send([
           { message: "Timeout, Can't update breackfast or launch meal now." },
         ]);
@@ -232,7 +232,10 @@ async function run() {
         return res.send(result);
       }
       // update brackfast or launch or dinner info
-      if (new Date().getHours() > 19 && new Date().getHours() < 7) {
+      if (
+        (new Date().getHours() > 19 && new Date().getHours() >= 23) ||
+        new Date().getHours() < 8
+      ) {
         const updatedMealDoc = {
           $set: {
             breackfast,
@@ -244,7 +247,7 @@ async function run() {
           filter,
           updatedMealDoc
         );
-        return res.send({ message: 'updated wrokd' });
+        return res.send([{ message: 'Update successfully' }]);
       }
     });
 
