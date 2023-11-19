@@ -133,6 +133,13 @@ async function run() {
         email,
         date: new Date().toLocaleDateString(),
       });
+      const isExistsNextMeal = await allMealCollection.findOne({
+        email,
+        date: `${new Date().getMonth() + 1}/${
+          new Date().getDate() + 1
+        }/${new Date().getFullYear()}`,
+      });
+
       if (!isExists) {
         return res.send([
           {
@@ -144,9 +151,13 @@ async function run() {
       if (isExists && new Date().getHours() < 20) {
         return res.send([
           {
-            message: 'Your todays meal already exists.',
+            message:
+              'Your todays meal already exists. Add your next meal between 08:00PM - 11:59PM',
           },
         ]);
+      }
+      if (isExistsNextMeal && new Date().getHours() > 19) {
+        return res.send([{ message: 'Your next day meal already exists' }]);
       }
       if (isExists && new Date().getHours() > 19) {
         const mealInfo = {
@@ -156,12 +167,8 @@ async function run() {
           launch,
           dinner,
         };
-        try {
-          const result = await allMealCollection.insertOne(mealInfo);
-          res.send(result);
-        } catch (error) {
-          console.log(error.message);
-        }
+        const result = await allMealCollection.insertOne(mealInfo);
+        res.send(result);
       }
     });
 
@@ -224,7 +231,7 @@ async function run() {
         );
         return res.send(result);
       }
-      // update brackfast or launch info
+      // update brackfast or launch or dinner info
       if (new Date().getHours() > 19 && new Date().getHours() < 7) {
         const updatedMealDoc = {
           $set: {
@@ -237,7 +244,7 @@ async function run() {
           filter,
           updatedMealDoc
         );
-        return res.send(result);
+        return res.send({ message: 'updated wrokd' });
       }
     });
 
