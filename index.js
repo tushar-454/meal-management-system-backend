@@ -37,7 +37,12 @@ async function run() {
     app.get('/api/v1/user/all-meal', async (req, res) => {
       const { email, date } = req.query;
       try {
-        const allMealArr = await allMealCollection.find().toArray();
+        const allMealArr = await allMealCollection
+          .find()
+          .sort({
+            date: 1,
+          })
+          .toArray();
         // get all meal by user uid
         if (email) {
           const uidAllMeal = allMealArr.filter(
@@ -128,7 +133,7 @@ async function run() {
 
     // add a meal in database api end point
     app.post('/api/v1/user/add-meal', async (req, res) => {
-      const { email, date, breackfast, launch, dinner } = req.body;
+      const { email, date, breackfast, launch, dinner, perDayTotal } = req.body;
       const isExists = await allMealCollection.findOne({
         email,
         date: new Date().toLocaleDateString(),
@@ -139,15 +144,7 @@ async function run() {
           new Date().getDate() + 1
         }/${new Date().getFullYear()}`,
       });
-
-      if (!isExists) {
-        return res.send([
-          {
-            message:
-              "Can't find todays meal, first contact with manager or admin",
-          },
-        ]);
-      }
+      const newMealEntry = await allMealCollection.findOne({ email });
       if (isExists && new Date().getHours() < 20) {
         return res.send([
           {
@@ -159,16 +156,25 @@ async function run() {
       if (isExistsNextMeal && new Date().getHours() > 19) {
         return res.send([{ message: 'Your next day meal already exists' }]);
       }
-      if (isExists && new Date().getHours() > 19) {
+      if ((isExists && new Date().getHours() > 19) || !newMealEntry) {
         const mealInfo = {
           email,
           date,
           breackfast,
           launch,
           dinner,
+          perDayTotal,
         };
         const result = await allMealCollection.insertOne(mealInfo);
         res.send(result);
+      }
+      if (!isExists) {
+        return res.send([
+          {
+            message:
+              "Can't find todays meal, first contact with manager or admin",
+          },
+        ]);
       }
     });
 
@@ -209,7 +215,7 @@ async function run() {
     app.put('/api/v1/user/update-meal', async (req, res) => {
       const { id, email } = req.query;
       const filter = { _id: new ObjectId(id) };
-      const { breackfast, launch, dinner } = req.body;
+      const { breackfast, launch, dinner, perDayTotal } = req.body;
       if (new Date().getHours() > 7 && new Date().getHours() < 20) {
         return res.send([
           { message: "Timeout, Can't update breackfast or launch meal now." },
@@ -223,6 +229,7 @@ async function run() {
         const updatedMealDoc = {
           $set: {
             dinner,
+            perDayTotal,
           },
         };
         const result = await allMealCollection.updateOne(
@@ -241,6 +248,7 @@ async function run() {
             breackfast,
             launch,
             dinner,
+            perDayTotal,
           },
         };
         const result = await allMealCollection.updateOne(
