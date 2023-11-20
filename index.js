@@ -180,17 +180,9 @@ async function run() {
 
     // add money in database api end point
     app.post('/api/v1/user/add-money', async (req, res) => {
-      const { uid, paymentTime, toWhome, money, status } = req.body;
-      const moneyInfo = {
-        [uid]: {
-          paymentTime,
-          toWhome,
-          money,
-          status,
-        },
-      };
+      const addMoneyInfo = req.body;
       try {
-        const result = await allMoneyCollection.insertOne(moneyInfo);
+        const result = await allMoneyCollection.insertOne(addMoneyInfo);
         res.send(result);
       } catch (error) {
         console.log(error.message);
