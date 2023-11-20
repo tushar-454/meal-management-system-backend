@@ -66,22 +66,37 @@ async function run() {
 
     // get all money api end point
     app.get('/api/v1/user/all-money', async (req, res) => {
-      const { uid, paymentDate } = req.query;
+      const { email, date, month } = req.query;
       try {
         const allMoneyArr = await allMoneyCollection.find().toArray();
-        // get all money info by user uid
-        if (uid) {
-          const uidAllMoney = allMoneyArr.filter(
-            (singleMoney) => Object.keys(singleMoney)[0] === uid
-          );
+        // get all money info by user email
+        if (email) {
+          const emailAllMoney = await allMoneyCollection
+            .find({ email })
+            .toArray();
           // get one moneyinfo by user uid and date
-          if (paymentDate) {
-            const uidOneMoneyByDate = uidAllMoney.filter(
-              (singleMoney) => singleMoney[uid].paymentTime === paymentDate
+          if (date) {
+            const emailOneMoneyByDate = emailAllMoney.filter(
+              // todo best way to query
+              (singleMoney) =>
+                new Date(singleMoney.date).toLocaleDateString() === date
             );
-            return res.send(uidOneMoneyByDate);
+            return res.send(emailOneMoneyByDate);
           }
-          return res.send(uidAllMoney);
+          // get user email all money and one month data
+          if (month) {
+            const monthlyAllMoney = emailAllMoney.filter((singleMoney) => {
+              const singleMoneyDate = new Date(singleMoney.date);
+              return (
+                `${
+                  singleMoneyDate.getMonth() + 1
+                }/${singleMoneyDate.getFullYear()}` === month
+              );
+            });
+            return res.send(monthlyAllMoney);
+            // todo
+          }
+          return res.send(emailAllMoney);
         }
         res.send(allMoneyArr);
       } catch (error) {
