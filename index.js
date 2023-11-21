@@ -141,8 +141,12 @@ async function run() {
 
     // get all user basic info in database
     app.get('/api/v1/userInfo', async (req, res) => {
-      const { email } = req.query;
-      const result = await userInfoCollection.findOne({ email });
+      const { email, accountStatus } = req.query;
+      let query = {};
+      if (email) query.email = email;
+      if (accountStatus) query.accountStatus = accountStatus;
+      if (email && accountStatus) query = { email, accountStatus };
+      const result = await userInfoCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -213,8 +217,8 @@ async function run() {
 
     // add user basic info in database
     app.post('/api/v1/userInfo', async (req, res) => {
-      const userInfoDoc = req.body;
-      const result = await userInfoCollection.insertOne(userInfoDoc);
+      const userInfo = req.body;
+      const result = await userInfoCollection.insertOne(userInfo);
       res.send(result);
     });
 
