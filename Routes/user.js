@@ -2,12 +2,12 @@ const router = require('express').Router();
 
 router.get('/userInfo', async (req, res) => {
   const { email, accountStatus } = req.query;
-  let query = {};
-  if (email) query.email = email;
-  if (accountStatus) query.accountStatus = accountStatus;
-  if (email && accountStatus) query = { email, accountStatus };
-  const result = await userInfoCollection.find(query).toArray();
-  res.send(result);
+  // let query = {};
+  // if (email) query.email = email;
+  // if (accountStatus) query.accountStatus = accountStatus;
+  // if (email && accountStatus) query = { email, accountStatus };
+  // const result = await userInfoCollection.find(query).toArray();
+  res.send(email);
 });
 
 router.post('/userInfo', async (req, res) => {

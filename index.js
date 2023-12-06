@@ -6,10 +6,14 @@ const logger = require('./Middleware/logger');
 const globalError = require('./Error/globalError');
 require('dotenv').config();
 const port = process.env.PORT || 4000;
+const error = require('./Error/error');
+const routes = require('./Routes');
+
 // middleware
 app.use(express.json());
 app.use(cors());
 app.use(logger);
+app.use(routes);
 app.use(globalError);
 
 app.get('/', (req, res) => {
