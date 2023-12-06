@@ -3,12 +3,14 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const logger = require('./Middleware/logger');
+const globalError = require('./Error/globalError');
 require('dotenv').config();
 const port = process.env.PORT || 4000;
 // middleware
 app.use(express.json());
 app.use(cors());
 app.use(logger);
+app.use(globalError);
 
 app.get('/', (req, res) => {
   res.send({ message: 'Api is working.' });
