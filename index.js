@@ -15,10 +15,8 @@ app.get('/health', (req, res) => {
   res.send({ message: 'Server is running fine' });
 });
 
-// database connection
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@meal-minder-pro.rsrce6d.mongodb.net/?retryWrites=true&w=majority`;
 mongoose
-  .connect(uri)
+  .connect(process.env.URI)
   .then(() => {
     console.log(
       'Pinged your deployment. You successfully connected to MongoDB!'
