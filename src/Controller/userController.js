@@ -42,25 +42,23 @@ const getMeal = async (req, res, next) => {
     // get a single meal by email and date
     if (email && date) {
       const oneMealByEmailDate = await getMealsByQuery({ email, date });
-      // const totalMeal = (await Meal.find({ email })).reduce(
-      //   (acc, cur) => cur.perDayTotal + acc,
-      //   0
-      // );
-      const oneUserTotalMeal = await Meal.aggregate([
-        {
-          $match: { email: email },
-        },
-        {
-          $group: {
-            _id: null,
-            totalPerDayTotal: { $sum: '$perDayTotal' },
-          },
-        },
-      ]);
+      // get this user total meal
+      const allMearForEmail = await Meal.find({ email });
+      const totalMeal = await allMearForEmail.reduce((acc, cur) => {
+        const getDate = new Date(cur.date);
+        const curDate = new Date();
+        if (
+          getDate.getMonth() === curDate.getMonth() &&
+          getDate.getFullYear() === curDate.getFullYear()
+        ) {
+          acc += cur.perDayTotal;
+        }
+        return acc;
+      }, 0);
 
       return res.status(200).json({
         oneMealByEmailDate,
-        totalMeal: oneUserTotalMeal[0].totalPerDayTotal,
+        totalMeal,
       });
     }
     // get all meal by user email
