@@ -1,3 +1,5 @@
+const Meal = require('../Model/Meal');
+
 const router = require('express').Router();
 
 router.get('/userInfo', async (req, res) => {
@@ -19,12 +21,9 @@ router.post('/userInfo', async (req, res) => {
 router.get('/all-meal', async (req, res) => {
   const { email, date } = req.query;
   try {
-    const allMealArr = await allMealCollection
-      .find()
-      .sort({
-        date: 1,
-      })
-      .toArray();
+    const allMealArr = await Meal.find().sort({
+      date: 1,
+    });
     // get all meal by user uid
     if (email) {
       const uidAllMeal = allMealArr.filter(
