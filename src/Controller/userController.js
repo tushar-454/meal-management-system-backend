@@ -31,4 +31,34 @@ const addUser = async (req, res, next) => {
   }
 };
 
-module.exports = { getUser, addUser };
+/* get all meal or get 
+   get meals using email or date qurey
+   get meal using email and date query
+*/
+const getMeal = async (req, res, next) => {
+  try {
+    const { email, date } = req.query;
+    const allMealData = await Meal.find().sort({ date: 1 });
+    // get a single meal by email and date
+    if (email && date) {
+      const oneMealByEmailDate = await getMealsByQuery({ email, date });
+      return res.status(200).json(oneMealByEmailDate);
+    }
+    // get all meal by user email
+    if (email) {
+      const allMealsByEmail = await getMealsByQuery({ email });
+      return res.status(200).json(allMealsByEmail);
+    }
+    // get all meal by user date
+    if (date) {
+      const allMealsByDate = await getMealsByQuery({ date });
+      return res.status(200).json(allMealsByDate);
+    }
+
+    res.status(200).json(allMealData);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getUser, addUser, getMeal };
