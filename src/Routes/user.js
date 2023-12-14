@@ -1,49 +1,12 @@
-const Meal = require('../Model/Meal');
-
 const router = require('express').Router();
+const Meal = require('../Model/Meal');
+const userController = require('../Controller/userController');
 
-router.get('/userInfo', async (req, res) => {
-  const { email, accountStatus } = req.query;
-  // let query = {};
-  // if (email) query.email = email;
-  // if (accountStatus) query.accountStatus = accountStatus;
-  // if (email && accountStatus) query = { email, accountStatus };
-  // const result = await userInfoCollection.find(query).toArray();
-  res.send(email);
-});
+router.get('/userInfo', userController.getUser);
 
-router.post('/userInfo', async (req, res) => {
-  const userInfo = req.body;
-  const result = await userInfoCollection.insertOne(userInfo);
-  res.send(result);
-});
+router.post('/userInfo', userController.addUser);
 
-router.get('/all-meal', async (req, res) => {
-  const { email, date } = req.query;
-  try {
-    const allMealArr = await Meal.find().sort({
-      date: 1,
-    });
-    // get all meal by user uid
-    if (email) {
-      const uidAllMeal = allMealArr.filter(
-        (singleMeal) => singleMeal.email === email
-      );
-      // get one meal by user uid and date
-      if (date) {
-        const uidOneMealByDate = uidAllMeal.filter(
-          (singleMeal) =>
-            new Date(singleMeal.date).toLocaleDateString() === date
-        );
-        return res.send(uidOneMealByDate);
-      }
-      return res.send(uidAllMeal);
-    }
-    res.send(allMealArr);
-  } catch (error) {
-    console.log(error.message);
-  }
-});
+router.get('/all-meal', userController.getMeal);
 
 router.get('/all-money', async (req, res) => {
   const { email, date, month } = req.query;
