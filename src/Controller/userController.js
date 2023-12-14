@@ -1,4 +1,5 @@
 const Meal = require('../Model/Meal');
+const Money = require('../Model/Money');
 const User = require('../Model/UserInfo');
 const { getMealsByQuery } = require('../Services/userServices');
 
@@ -34,6 +35,7 @@ const addUser = async (req, res, next) => {
 /* get all meal or get 
    get meals using email or date qurey
    get meal using email and date query
+   get current month current user total meal
 */
 const getMeal = async (req, res, next) => {
   try {
@@ -79,4 +81,31 @@ const getMeal = async (req, res, next) => {
   }
 };
 
-module.exports = { getUser, addUser, getMeal };
+/* */
+const addMeal = async (req, res, next) => {};
+
+/* 
+  get all money by email
+  get all money by month and year
+*/
+const getMoney = async (req, res, next) => {
+  try {
+    const { email } = req.query;
+    const allMoneyByEmail = await Money.find({ email });
+    const getCurMonthMoneyForEmail = allMoneyByEmail.filter((item) => {
+      const curDate = new Date();
+      const getDate = new Date(item.date);
+      if (
+        getDate.getMonth() === curDate.getMonth() &&
+        getDate.getFullYear() === curDate.getFullYear()
+      ) {
+        return item;
+      }
+    });
+    res.status(200).json(getCurMonthMoneyForEmail);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getUser, addUser, getMeal, addMeal, getMoney };

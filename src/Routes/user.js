@@ -7,76 +7,7 @@ router.get('/userInfo', userController.getUser);
 router.post('/userInfo', userController.addUser);
 
 router.get('/all-meal', userController.getMeal);
-
-router.get('/all-money', async (req, res) => {
-  const { email, date, month } = req.query;
-  try {
-    const allMoneyArr = await allMoneyCollection.find().toArray();
-    // get all money info by user email
-    if (email) {
-      const emailAllMoney = await allMoneyCollection.find({ email }).toArray();
-      // get one moneyinfo by user uid and date
-      if (date) {
-        const emailOneMoneyByDate = emailAllMoney.filter(
-          // todo best way to query
-          (singleMoney) =>
-            new Date(singleMoney.date).toLocaleDateString() === date
-        );
-        return res.send(emailOneMoneyByDate);
-      }
-      // get user email all money and one month data
-      if (month) {
-        const monthlyAllMoney = emailAllMoney.filter((singleMoney) => {
-          const singleMoneyDate = new Date(singleMoney.date);
-          return (
-            `${
-              singleMoneyDate.getMonth() + 1
-            }/${singleMoneyDate.getFullYear()}` === month
-          );
-        });
-        return res.send(monthlyAllMoney);
-        // todo
-      }
-      return res.send(emailAllMoney);
-    }
-    res.send(allMoneyArr);
-  } catch (error) {
-    console.log(error.message);
-  }
-});
-
-router.get('/all-cost', async (req, res) => {
-  const { email, date, type, monthYear } = req.query;
-  if (email && !date && !type) {
-    const result = await allCostCollection
-      .find({ whoDoingBazarEmail: email })
-      .toArray();
-    return res.send(result);
-  }
-  if (!email && date && !type) {
-    const result = await allCostCollection.find({ date }).toArray();
-    return res.send(result);
-  }
-  if (!email && !date && type) {
-    const result = await allCostCollection.find({ whatType: type }).toArray();
-    return res.send(result);
-  }
-  if (!email && !date && !type && monthYear) {
-    const allCosts = await allCostCollection.find().toArray();
-    const monthlyCosts = [];
-    allCosts.forEach((cost) => {
-      const dateObj = new Date(cost.date);
-      const date = `${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
-      if (date === monthYear) {
-        monthlyCosts.push(cost);
-      }
-    });
-    return res.send(monthlyCosts);
-  }
-  const result = await allCostCollection.find().toArray();
-  res.send(result);
-});
-
+router.get('/all-money', userController.getMoney);
 router.post('/add-meal', async (req, res) => {
   const { email, date, breackfast, launch, dinner, perDayTotal } = req.body;
   const isExists = await allMealCollection.findOne({
@@ -120,6 +51,38 @@ router.post('/add-meal', async (req, res) => {
       },
     ]);
   }
+});
+
+router.get('/all-cost', async (req, res) => {
+  const { email, date, type, monthYear } = req.query;
+  if (email && !date && !type) {
+    const result = await allCostCollection
+      .find({ whoDoingBazarEmail: email })
+      .toArray();
+    return res.send(result);
+  }
+  if (!email && date && !type) {
+    const result = await allCostCollection.find({ date }).toArray();
+    return res.send(result);
+  }
+  if (!email && !date && type) {
+    const result = await allCostCollection.find({ whatType: type }).toArray();
+    return res.send(result);
+  }
+  if (!email && !date && !type && monthYear) {
+    const allCosts = await allCostCollection.find().toArray();
+    const monthlyCosts = [];
+    allCosts.forEach((cost) => {
+      const dateObj = new Date(cost.date);
+      const date = `${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+      if (date === monthYear) {
+        monthlyCosts.push(cost);
+      }
+    });
+    return res.send(monthlyCosts);
+  }
+  const result = await allCostCollection.find().toArray();
+  res.send(result);
 });
 
 router.post('/add-money', async (req, res) => {
