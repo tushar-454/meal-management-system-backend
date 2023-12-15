@@ -82,8 +82,58 @@ const getMeal = async (req, res, next) => {
   }
 };
 
-/* */
-const addMeal = async (req, res, next) => {};
+/* 
+  user can add there meal breackfast,launch and dinner in a perticular time
+*/
+const addMeal = async (req, res, next) => {
+  try {
+    const { email, date, breackfast, launch, dinner, perDayTotal } = req.body;
+    const curDate = new Date();
+    const isExists = await Meal.findOne({
+      email,
+      date: curDate.toLocaleDateString(),
+    });
+    const isExistsNextMeal = await Meal.findOne({
+      email,
+      date: `${curDate.getMonth() + 1}/${
+        curDate.getDate() + 1
+      }/${curDate.getFullYear()}`,
+    });
+    // if user add first time then not find email so the condition for that user
+    const newMealEntry = await Meal.findOne({ email });
+    // now codition check for add meal
+    if (isExists && curDate.getHours() < 20) {
+      return res.status(403).json({
+        message:
+          'Your todays meal already exists. Add your next meal between 08:00PM - 11:59PM',
+      });
+    }
+    if (isExistsNextMeal && curDate.getHours() > 19) {
+      return res.status(403).json({
+        message: 'Your next day meal already exists',
+      });
+    }
+    if ((isExists && curDate.getHours() > 19) || !newMealEntry) {
+      const createMeal = new Meal({
+        email,
+        date,
+        breackfast,
+        launch,
+        dinner,
+        perDayTotal,
+      });
+      const result = await createMeal.save();
+      return res.status(201).json({ message: 'success' });
+    }
+    if (!isExists) {
+      return res.status(404).json({
+        message: "Can't find todays meal, first contact with manager or admin",
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
 
 /* 
   get all money by email
@@ -188,6 +238,7 @@ const addCost = async (req, res, next) => {
     next(error);
   }
 };
+
 module.exports = {
   getUser,
   addUser,

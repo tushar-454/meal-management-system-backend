@@ -8,50 +8,7 @@ router.post('/userInfo', userController.addUser);
 
 router.get('/all-meal', userController.getMeal);
 
-router.post('/add-meal', async (req, res) => {
-  const { email, date, breackfast, launch, dinner, perDayTotal } = req.body;
-  const isExists = await allMealCollection.findOne({
-    email,
-    date: new Date().toLocaleDateString(),
-  });
-  const isExistsNextMeal = await allMealCollection.findOne({
-    email,
-    date: `${new Date().getMonth() + 1}/${
-      new Date().getDate() + 1
-    }/${new Date().getFullYear()}`,
-  });
-  const newMealEntry = await allMealCollection.findOne({ email });
-  if (isExists && new Date().getHours() < 20) {
-    return res.send([
-      {
-        message:
-          'Your todays meal already exists. Add your next meal between 08:00PM - 11:59PM',
-      },
-    ]);
-  }
-  if (isExistsNextMeal && new Date().getHours() > 19) {
-    return res.send([{ message: 'Your next day meal already exists' }]);
-  }
-  if ((isExists && new Date().getHours() > 19) || !newMealEntry) {
-    const mealInfo = {
-      email,
-      date,
-      breackfast,
-      launch,
-      dinner,
-      perDayTotal,
-    };
-    const result = await allMealCollection.insertOne(mealInfo);
-    res.send(result);
-  }
-  if (!isExists) {
-    return res.send([
-      {
-        message: "Can't find todays meal, first contact with manager or admin",
-      },
-    ]);
-  }
-});
+router.post('/add-meal', userController.addMeal);
 
 router.get('/all-money', userController.getMoney);
 
