@@ -108,4 +108,18 @@ const getMoney = async (req, res, next) => {
   }
 };
 
-module.exports = { getUser, addUser, getMeal, addMeal, getMoney };
+/*
+  add monery in database from user
+*/
+const addMoney = async (req, res, next) => {
+  try {
+    const { date, toWhome, money, status, email } = req.body;
+    const createMoney = new Money({ date, toWhome, money, status, email });
+    const result = await createMoney.save();
+    res.status(201).json({ message: 'success' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getUser, addUser, getMeal, addMeal, getMoney, addMoney };

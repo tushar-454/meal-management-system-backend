@@ -85,15 +85,7 @@ router.get('/all-cost', async (req, res) => {
   res.send(result);
 });
 
-router.post('/add-money', async (req, res) => {
-  const addMoneyInfo = req.body;
-  try {
-    const result = await allMoneyCollection.insertOne(addMoneyInfo);
-    res.send(result);
-  } catch (error) {
-    console.log(error.message);
-  }
-});
+router.post('/add-money', userController.addMoney);
 
 router.post('/add-cost', async (req, res) => {
   const costDoc = req.body;
