@@ -40,8 +40,27 @@ const addUser = async (req, res, next) => {
 */
 const getMeal = async (req, res, next) => {
   try {
-    const { email, date } = req.query;
+    const { email, date, curMonth } = req.query;
     const allMealData = await Meal.find().sort({ date: 1 });
+    // get all meal in current month for current user
+    if (curMonth === 'true') {
+      const allMearForEmail = await Meal.find({ email });
+      const curMonthAllMeal = allMearForEmail.filter((item) => {
+        const getDate = new Date(item.date);
+        const curDate = new Date();
+        if (
+          getDate.getMonth() === curDate.getMonth() &&
+          getDate.getFullYear() === curDate.getFullYear()
+        ) {
+          return item;
+        }
+      });
+      const curTotalMeal = curMonthAllMeal.reduce(
+        (acc, cur) => parseFloat(acc) + parseFloat(cur.perDayTotal),
+        0
+      );
+      return res.status(200).json({ curMonthAllMeal, curTotalMeal });
+    }
     // get a single meal by email and date
     if (email && date) {
       const oneMealByEmailDate = await getMealsByQuery({ email, date });
@@ -153,7 +172,11 @@ const getMoney = async (req, res, next) => {
         return item;
       }
     });
-    res.status(200).json(getCurMonthMoneyForEmail);
+    const totalMoney = getCurMonthMoneyForEmail.reduce(
+      (acc, cur) => parseFloat(acc) + parseFloat(cur.money),
+      0
+    );
+    res.status(200).json({ getCurMonthMoneyForEmail, totalMoney });
   } catch (error) {
     next(error);
   }
