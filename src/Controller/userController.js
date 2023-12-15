@@ -161,6 +161,33 @@ const getCost = async (req, res, next) => {
   }
 };
 
+/*
+  add a cost in database 
+*/
+const addCost = async (req, res, next) => {
+  try {
+    const {
+      date,
+      whoDoingBazar,
+      whoDoingBazarEmail,
+      howCost,
+      bazarListUrl,
+      whatType,
+    } = req.body;
+    const createCost = new Cost({
+      date,
+      whoDoingBazar,
+      whoDoingBazarEmail,
+      howCost,
+      bazarListUrl,
+      whatType,
+    });
+    const result = await createCost.save();
+    res.status(201).json({ message: 'success' });
+  } catch (error) {
+    next(error);
+  }
+};
 module.exports = {
   getUser,
   addUser,
@@ -169,4 +196,5 @@ module.exports = {
   getMoney,
   addMoney,
   getCost,
+  addCost,
 };

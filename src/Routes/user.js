@@ -7,7 +7,7 @@ router.get('/userInfo', userController.getUser);
 router.post('/userInfo', userController.addUser);
 
 router.get('/all-meal', userController.getMeal);
-router.get('/all-money', userController.getMoney);
+
 router.post('/add-meal', async (req, res) => {
   const { email, date, breackfast, launch, dinner, perDayTotal } = req.body;
   const isExists = await allMealCollection.findOne({
@@ -53,15 +53,13 @@ router.post('/add-meal', async (req, res) => {
   }
 });
 
+router.get('/all-money', userController.getMoney);
+
 router.get('/all-cost', userController.getCost);
 
-router.post('/add-money', userController.addMoney);
+router.post('/add-cost', userController.addCost);
 
-router.post('/add-cost', async (req, res) => {
-  const costDoc = req.body;
-  const result = await allCostCollection.insertOne(costDoc);
-  res.send(result);
-});
+router.post('/add-money', userController.addMoney);
 
 router.put('/update-meal', async (req, res) => {
   const { id, email } = req.query;
