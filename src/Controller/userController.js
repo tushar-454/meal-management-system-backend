@@ -239,6 +239,63 @@ const addCost = async (req, res, next) => {
   }
 };
 
+/*
+  update user meal 
+  here have lot of condition for update meal different time
+*/
+const updateMeal = async (req, res, next) => {
+  try {
+    const { breackfast, launch, dinner, perDayTotal } = req.body;
+    const { id, email } = req.query;
+    const curDate = new Date();
+    // let's start update meal based on condition
+    if (curDate.getHours() > 16 && curDate.getHours() < 20) {
+      return res
+        .status(408)
+        .json({ message: "Timeout, Can't update any meal now." });
+    }
+    const meal = await Meal.findOne({ _id: new Object(id) });
+    // update just dinner meal whole day to noon
+    if (curDate.getHours() > 0 && curDate.getHours() < 17) {
+      // update brackfast or launch or dinner info
+      if (
+        (curDate.getHours() > 19 && curDate.getHours() >= 23) ||
+        curDate.getHours() < 8
+      ) {
+        meal.breackfast = breackfast ?? meal.breackfast;
+        meal.launch = launch ?? meal.launch;
+        meal.dinner = dinner ?? meal.dinner;
+        meal.perDayTotal = perDayTotal ?? meal.perDayTotal;
+        await meal.save();
+        return res.status(201).json({ message: 'all success' });
+      }
+      // --------
+      meal.dinner = dinner ?? meal.dinner;
+      meal.perDayTotal = perDayTotal ?? meal.perDayTotal;
+      await meal.save();
+      return res.status(201).json({ message: 'dinner success' });
+    }
+    // update brackfast or launch or dinner info
+    // i will do update today but meal next day
+    if (curDate.getHours() > 19 && curDate.getHours() >= 23) {
+      // we need to find next day meal
+      meal.breackfast = breackfast ?? meal.breackfast;
+      meal.launch = launch ?? meal.launch;
+      meal.dinner = dinner ?? meal.dinner;
+      meal.perDayTotal = perDayTotal ?? meal.perDayTotal;
+      await meal.save();
+      return res.status(201).json({ message: 'next day success' });
+    }
+    if (curDate.getHours() > 7 && curDate.getHours() < 20) {
+      return res.status(408).json({
+        message: "Timeout, Can't update breackfast or launch meal now.",
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getUser,
   addUser,
@@ -248,4 +305,5 @@ module.exports = {
   addMoney,
   getCost,
   addCost,
+  updateMeal,
 };
