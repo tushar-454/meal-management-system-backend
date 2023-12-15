@@ -1,3 +1,4 @@
+const Cost = require('../Model/Cost');
 const Meal = require('../Model/Meal');
 const Money = require('../Model/Money');
 const User = require('../Model/UserInfo');
@@ -122,4 +123,50 @@ const addMoney = async (req, res, next) => {
   }
 };
 
-module.exports = { getUser, addUser, getMeal, addMeal, getMoney, addMoney };
+/*
+  get current user all cost using email and get current month year all cost using query
+*/
+const getCost = async (req, res, next) => {
+  try {
+    const { email } = req.query;
+    // get current user all cost in current month
+    if (email) {
+      const allCostEmailUser = await Cost.find({ whoDoingBazarEmail: email });
+      const curMonthAllCost = allCostEmailUser.filter((item) => {
+        const curDate = new Date();
+        const getDate = new Date(item.date);
+        if (
+          getDate.getMonth() === curDate.getMonth() &&
+          getDate.getFullYear() === curDate.getFullYear()
+        ) {
+          return item;
+        }
+      });
+      return res.status(200).json(curMonthAllCost);
+    }
+    const allCost = await Cost.find();
+    const curMonthAllCost = allCost.filter((item) => {
+      const curDate = new Date();
+      const getDate = new Date(item.date);
+      if (
+        getDate.getMonth() === curDate.getMonth() &&
+        getDate.getFullYear() === curDate.getFullYear()
+      ) {
+        return item;
+      }
+    });
+    res.status(200).json(curMonthAllCost);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  getUser,
+  addUser,
+  getMeal,
+  addMeal,
+  getMoney,
+  addMoney,
+  getCost,
+};
